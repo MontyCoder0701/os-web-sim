@@ -1,4 +1,4 @@
-use chrono::{Duration, Utc};
+use chrono::{Duration, TimeZone, Utc};
 use schedules::{FirstComeFirstServed, Process, RoundRobin, Scheduler, ShortestJobFirst};
 use yew::prelude::*;
 
@@ -27,79 +27,52 @@ fn App() -> Html {
     let rr = RoundRobin {
         quantum: Duration::seconds(2),
     };
-    let scsf = FirstComeFirstServed;
+    let fcfs = FirstComeFirstServed;
     let sjf = ShortestJobFirst;
 
     let rr_logs = rr.schedule(processes.clone());
-    let fcfs_logs = scsf.schedule(processes.clone());
+    let fcfs_logs = fcfs.schedule(processes.clone());
     let sjf_logs = sjf.schedule(processes.clone());
 
     html! {
-        <div>
-            <div>
-                <h1>{ "Round Robin" }</h1>
-                <table border="1">
-                    <tr>
-                        <th>{ "PID" }</th>
-                        <th>{ "Start" }</th>
-                        <th>{ "End" }</th>
-                    </tr>
-                    {
-                        rr_logs.iter().map(|log| {
-                            html! {
-                                <tr>
-                                    <td>{ &log.pid }</td>
-                                    <td>{ log.start_date_time.to_rfc2822() }</td>
-                                    <td>{ log.end_date_time.to_rfc2822() }</td>
-                                </tr>
-                            }
-                        }).collect::<Html>()
-                    }
-                </table>
-            </div>
+        <div style="padding: 32px;">
+            { render_gantt_chart("Round Robin", &rr_logs) }
+            { render_gantt_chart("First Come First Served", &fcfs_logs) }
+            { render_gantt_chart("Shortest Job First", &sjf_logs) }
 
-            <div>
-                <h1>{ "First Come First Served" }</h1>
-                <table border="1">
-                    <tr>
-                        <th>{ "PID" }</th>
-                        <th>{ "Start" }</th>
-                        <th>{ "End" }</th>
-                    </tr>
-                    {
-                        fcfs_logs.iter().map(|log| {
-                            html! {
-                                <tr>
-                                    <td>{ &log.pid }</td>
-                                    <td>{ log.start_date_time.to_rfc2822() }</td>
-                                    <td>{ log.end_date_time.to_rfc2822() }</td>
-                                </tr>
-                            }
-                        }).collect::<Html>()
-                    }
-                </table>
-            </div>
+            <footer style="margin-top: 64px; text-align: center; color: #6b7280; font-size: 0.9rem;">
+                { "© 2025 OS Web Sim — Built with Yew and Rust by MontyCoder0701" }
+            </footer>
+        </div>
+    }
+}
 
-            <div>
-                <h1>{ "Shortest Job First" }</h1>
-                <table border="1">
-                    <tr>
-                        <th>{ "PID" }</th>
-                        <th>{ "Start" }</th>
-                        <th>{ "End" }</th>
-                    </tr>
-                    {
-                        sjf_logs.iter().map(|log| {
-                            html! {
-                                <tr>
-                                    <td>{ &log.pid }</td>
-                                    <td>{ log.start_date_time.to_rfc2822() }</td>
-                                    <td>{ log.end_date_time.to_rfc2822() }</td>
-                                </tr>
-                            }
-                        }).collect::<Html>()
-                    }
-                </table>
+fn render_gantt_chart(title: &str, logs: &[schedules::ExecutionLog]) -> Html {
+    const SCALE: f64 = 20.0;
+
+    let base_time = logs
+        .first()
+        .map(|log| log.start_date_time)
+        .unwrap_or(Utc.timestamp_opt(0, 0).single().unwrap());
+
+    html! {
+        <div style="margin-bottom: 48px;">
+            <h2>{ title }</h2>
+            <div style="display: flex; align-items: center; position: relative; height: 40px; background: #f3f4f6;">
+                {
+                    logs.iter().map(|log| {
+                        let offset = (log.start_date_time - base_time).num_seconds() as f64 * SCALE;
+                        let width = (log.end_date_time - log.start_date_time).num_seconds() as f64 * SCALE;
+                        html! {
+                            <div style={format!(
+                                "position: absolute; left: {:.2}px; width: {:.2}px; height: 30px; background: #3b82f6; color: white; text-align: center; line-height: 30px; border-radius: 4px; border: 1px solid #1e3a8a;",
+                                offset, width
+                            )}>
+                                { &log.pid }
+                            </div>
+                        }
+                    }).collect::<Html>()
+                }
             </div>
         </div>
     }
