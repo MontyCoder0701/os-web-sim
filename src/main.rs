@@ -41,7 +41,13 @@ fn App() -> Html {
             { render_gantt_chart("Shortest Job First", &sjf_logs) }
 
             <footer style="margin-top: 64px; text-align: center; color: #6b7280; font-size: 0.9rem;">
-                { format!("© {} OS Web Sim — Built with Yew and Rust by MontyCoder0701", Utc::now().year()) }
+                { format!("© {} OS Web Sim — Built with Yew and Rust by ", Utc::now().year()) }
+                <a
+                target="_blank" rel="noopener noreferrer"
+                href="https://github.com/MontyCoder0701/os-web-sim"
+                >
+                 {"MontyCoder0701"}
+                </a>
             </footer>
         </div>
     }
