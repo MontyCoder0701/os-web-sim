@@ -67,7 +67,7 @@ impl Scheduler for RoundRobin {
 
 impl Scheduler for FirstComeFirstServed {
     fn schedule(&self, mut processes: Vec<Process>) -> Vec<ExecutionLog> {
-        let mut logs = vec![];
+        let mut execution_logs = vec![];
         processes.sort_by_key(|p| p.arrival_date_time);
 
         let mut current_time = processes[0].arrival_date_time;
@@ -80,7 +80,7 @@ impl Scheduler for FirstComeFirstServed {
             let start = current_time;
             let end = start + process.burst_duration;
 
-            logs.push(ExecutionLog {
+            execution_logs.push(ExecutionLog {
                 pid: process.id,
                 start_date_time: start,
                 end_date_time: end,
@@ -89,7 +89,7 @@ impl Scheduler for FirstComeFirstServed {
             current_time = end;
         }
 
-        return logs;
+        return execution_logs;
     }
 }
 
