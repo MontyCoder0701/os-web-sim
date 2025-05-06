@@ -1,5 +1,5 @@
 use chrono::{Duration, Utc};
-use schedules::{Process, round_robin};
+use schedules::{Process, RoundRobin, Scheduler, ShortestJobFirst};
 use yew::prelude::*;
 
 mod schedules;
@@ -24,30 +24,59 @@ fn App() -> Html {
         },
     ];
 
-    let quantum = Duration::seconds(2);
-    let logs = round_robin(processes, quantum);
+    let round_robin = RoundRobin {
+        quantum: Duration::seconds(2),
+    };
+    let sjf = ShortestJobFirst;
+
+    let round_robin_logs = round_robin.schedule(processes.clone());
+    let shortest_job_first_logs = sjf.schedule(processes.clone());
 
     html! {
         <div>
-            <h1>{ "Round Robin" }</h1>
-            <table border="1">
-                <tr>
-                    <th>{ "PID" }</th>
-                    <th>{ "Start" }</th>
-                    <th>{ "End" }</th>
-                </tr>
-                {
-                    logs.iter().map(|log| {
-                        html! {
-                            <tr>
-                                <td>{ &log.pid }</td>
-                                <td>{ log.start_date_time.to_rfc2822() }</td>
-                                <td>{ log.end_date_time.to_rfc2822() }</td>
-                            </tr>
-                        }
-                    }).collect::<Html>()
-                }
-            </table>
+            <div>
+                <h1>{ "Round Robin" }</h1>
+                <table border="1">
+                    <tr>
+                        <th>{ "PID" }</th>
+                        <th>{ "Start" }</th>
+                        <th>{ "End" }</th>
+                    </tr>
+                    {
+                        round_robin_logs.iter().map(|log| {
+                            html! {
+                                <tr>
+                                    <td>{ &log.pid }</td>
+                                    <td>{ log.start_date_time.to_rfc2822() }</td>
+                                    <td>{ log.end_date_time.to_rfc2822() }</td>
+                                </tr>
+                            }
+                        }).collect::<Html>()
+                    }
+                </table>
+            </div>
+
+            <div>
+                <h1>{ "Shortest Job First" }</h1>
+                <table border="1">
+                    <tr>
+                        <th>{ "PID" }</th>
+                        <th>{ "Start" }</th>
+                        <th>{ "End" }</th>
+                    </tr>
+                    {
+                        shortest_job_first_logs.iter().map(|log| {
+                            html! {
+                                <tr>
+                                    <td>{ &log.pid }</td>
+                                    <td>{ log.start_date_time.to_rfc2822() }</td>
+                                    <td>{ log.end_date_time.to_rfc2822() }</td>
+                                </tr>
+                            }
+                        }).collect::<Html>()
+                    }
+                </table>
+            </div>
         </div>
     }
 }
