@@ -1,5 +1,5 @@
 use chrono::{Duration, Utc};
-use schedules::{Process, RoundRobin, Scheduler, ShortestJobFirst};
+use schedules::{FirstComeFirstServed, Process, RoundRobin, Scheduler, ShortestJobFirst};
 use yew::prelude::*;
 
 mod schedules;
@@ -24,13 +24,15 @@ fn App() -> Html {
         },
     ];
 
-    let round_robin = RoundRobin {
+    let rr = RoundRobin {
         quantum: Duration::seconds(2),
     };
+    let scsf = FirstComeFirstServed;
     let sjf = ShortestJobFirst;
 
-    let round_robin_logs = round_robin.schedule(processes.clone());
-    let shortest_job_first_logs = sjf.schedule(processes.clone());
+    let rr_logs = rr.schedule(processes.clone());
+    let fcfs_logs = scsf.schedule(processes.clone());
+    let sjf_logs = sjf.schedule(processes.clone());
 
     html! {
         <div>
@@ -43,7 +45,29 @@ fn App() -> Html {
                         <th>{ "End" }</th>
                     </tr>
                     {
-                        round_robin_logs.iter().map(|log| {
+                        rr_logs.iter().map(|log| {
+                            html! {
+                                <tr>
+                                    <td>{ &log.pid }</td>
+                                    <td>{ log.start_date_time.to_rfc2822() }</td>
+                                    <td>{ log.end_date_time.to_rfc2822() }</td>
+                                </tr>
+                            }
+                        }).collect::<Html>()
+                    }
+                </table>
+            </div>
+
+            <div>
+                <h1>{ "First Come First Served" }</h1>
+                <table border="1">
+                    <tr>
+                        <th>{ "PID" }</th>
+                        <th>{ "Start" }</th>
+                        <th>{ "End" }</th>
+                    </tr>
+                    {
+                        fcfs_logs.iter().map(|log| {
                             html! {
                                 <tr>
                                     <td>{ &log.pid }</td>
@@ -65,7 +89,7 @@ fn App() -> Html {
                         <th>{ "End" }</th>
                     </tr>
                     {
-                        shortest_job_first_logs.iter().map(|log| {
+                        sjf_logs.iter().map(|log| {
                             html! {
                                 <tr>
                                     <td>{ &log.pid }</td>

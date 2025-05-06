@@ -21,6 +21,8 @@ pub struct RoundRobin {
     pub quantum: Duration,
 }
 
+pub struct FirstComeFirstServed;
+
 pub struct ShortestJobFirst;
 
 impl Scheduler for RoundRobin {
@@ -60,6 +62,34 @@ impl Scheduler for RoundRobin {
         }
 
         return execution_logs;
+    }
+}
+
+impl Scheduler for FirstComeFirstServed {
+    fn schedule(&self, mut processes: Vec<Process>) -> Vec<ExecutionLog> {
+        let mut logs = vec![];
+        processes.sort_by_key(|p| p.arrival_date_time);
+
+        let mut current_time = processes[0].arrival_date_time;
+
+        for process in processes {
+            if process.arrival_date_time > current_time {
+                current_time = process.arrival_date_time;
+            }
+
+            let start = current_time;
+            let end = start + process.burst_duration;
+
+            logs.push(ExecutionLog {
+                pid: process.id,
+                start_date_time: start,
+                end_date_time: end,
+            });
+
+            current_time = end;
+        }
+
+        return logs;
     }
 }
 
