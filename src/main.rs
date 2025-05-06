@@ -1,4 +1,4 @@
-use chrono::{Duration, TimeZone, Utc};
+use chrono::{Datelike, Duration, TimeZone, Utc};
 use schedules::{FirstComeFirstServed, Process, RoundRobin, Scheduler, ShortestJobFirst};
 use yew::prelude::*;
 
@@ -41,7 +41,7 @@ fn App() -> Html {
             { render_gantt_chart("Shortest Job First", &sjf_logs) }
 
             <footer style="margin-top: 64px; text-align: center; color: #6b7280; font-size: 0.9rem;">
-                { "© 2025 OS Web Sim — Built with Yew and Rust by MontyCoder0701" }
+                { format!("© {} OS Web Sim — Built with Yew and Rust by MontyCoder0701", Utc::now().year()) }
             </footer>
         </div>
     }
