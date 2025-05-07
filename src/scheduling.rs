@@ -31,19 +31,16 @@ pub struct Priority;
 impl Scheduling for RoundRobin {
     fn schedule(&self, processes: Vec<Process>) -> Vec<ExecutionLog> {
         let mut execution_logs = vec![];
-        let mut process_queue = processes;
-        process_queue.sort_by_key(|p| p.arrival_date_time);
+        let mut cloned_processes = processes;
+        cloned_processes.sort_by_key(|p| p.arrival_date_time);
 
-        let mut current_date_time = process_queue[0].arrival_date_time;
-        let mut remaining_process_queue = process_queue;
+        let mut current_time = cloned_processes[0].arrival_date_time;
 
-        while !remaining_process_queue.is_empty() {
-            let mut next = vec![];
-
-            for process in remaining_process_queue {
+        while !cloned_processes.is_empty() {
+            cloned_processes.retain_mut(|process| {
                 let duration = process.burst_duration.min(self.quantum);
-                let start = current_date_time;
-                let end = current_date_time + duration;
+                let start = current_time;
+                let end = current_time + duration;
 
                 execution_logs.push(ExecutionLog {
                     pid: process.id.clone(),
@@ -51,17 +48,15 @@ impl Scheduling for RoundRobin {
                     end_date_time: end,
                 });
 
-                current_date_time = end;
+                current_time = end;
 
-                if process.burst_duration > self.quantum {
-                    next.push(Process {
-                        burst_duration: process.burst_duration - self.quantum,
-                        ..process
-                    });
+                if process.burst_duration <= self.quantum {
+                    return false;
                 }
-            }
 
-            remaining_process_queue = next;
+                process.burst_duration -= self.quantum;
+                return true;
+            });
         }
 
         return execution_logs;
