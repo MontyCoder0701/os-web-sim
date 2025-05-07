@@ -1,8 +1,10 @@
 use chrono::{Datelike, Duration, TimeZone, Utc};
-use schedules::{FirstComeFirstServed, Priority, Process, RoundRobin, Scheduler, ShortestJobFirst};
+use scheduling::{
+    FirstComeFirstServed, Priority, Process, RoundRobin, Scheduling, ShortestJobFirst,
+};
 use yew::prelude::*;
 
-mod schedules;
+mod scheduling;
 
 #[function_component]
 fn App() -> Html {
@@ -59,7 +61,7 @@ fn App() -> Html {
     }
 }
 
-fn render_gantt_chart(title: &str, logs: &[schedules::ExecutionLog]) -> Html {
+fn render_gantt_chart(title: &str, logs: &[scheduling::ExecutionLog]) -> Html {
     const SCALE: f64 = 20.0;
 
     let base_time = logs

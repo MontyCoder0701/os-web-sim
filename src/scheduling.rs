@@ -14,7 +14,7 @@ pub struct ExecutionLog {
     pub end_date_time: DateTime<Utc>,
 }
 
-pub trait Scheduler {
+pub trait Scheduling {
     fn schedule(&self, processes: Vec<Process>) -> Vec<ExecutionLog>;
 }
 
@@ -28,7 +28,7 @@ pub struct ShortestJobFirst;
 
 pub struct Priority;
 
-impl Scheduler for RoundRobin {
+impl Scheduling for RoundRobin {
     fn schedule(&self, processes: Vec<Process>) -> Vec<ExecutionLog> {
         let mut execution_logs = vec![];
         let mut process_queue = processes;
@@ -68,7 +68,7 @@ impl Scheduler for RoundRobin {
     }
 }
 
-impl Scheduler for FirstComeFirstServed {
+impl Scheduling for FirstComeFirstServed {
     fn schedule(&self, mut processes: Vec<Process>) -> Vec<ExecutionLog> {
         let mut execution_logs = vec![];
         processes.sort_by_key(|p| p.arrival_date_time);
@@ -96,7 +96,7 @@ impl Scheduler for FirstComeFirstServed {
     }
 }
 
-impl Scheduler for ShortestJobFirst {
+impl Scheduling for ShortestJobFirst {
     fn schedule(&self, processes: Vec<Process>) -> Vec<ExecutionLog> {
         let mut execution_logs = vec![];
         let mut process_queue = processes;
@@ -136,7 +136,7 @@ impl Scheduler for ShortestJobFirst {
     }
 }
 
-impl Scheduler for Priority {
+impl Scheduling for Priority {
     fn schedule(&self, mut processes: Vec<Process>) -> Vec<ExecutionLog> {
         let mut execution_logs = vec![];
         let mut current_date_time = processes[0].arrival_date_time;
