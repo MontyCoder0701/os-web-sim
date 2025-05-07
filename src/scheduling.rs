@@ -34,13 +34,13 @@ impl Scheduling for RoundRobin {
         let mut cloned_processes = processes;
         cloned_processes.sort_by_key(|p| p.arrival_date_time);
 
-        let mut current_time = cloned_processes[0].arrival_date_time;
+        let mut current_date_time = cloned_processes[0].arrival_date_time;
 
         while !cloned_processes.is_empty() {
             cloned_processes.retain_mut(|process| {
                 let duration = process.burst_duration.min(self.quantum);
-                let start = current_time;
-                let end = current_time + duration;
+                let start = current_date_time;
+                let end = current_date_time + duration;
 
                 execution_logs.push(ExecutionLog {
                     pid: process.id.clone(),
@@ -48,7 +48,7 @@ impl Scheduling for RoundRobin {
                     end_date_time: end,
                 });
 
-                current_time = end;
+                current_date_time = end;
 
                 if process.burst_duration <= self.quantum {
                     return false;
@@ -64,18 +64,19 @@ impl Scheduling for RoundRobin {
 }
 
 impl Scheduling for FirstComeFirstServed {
-    fn schedule(&self, mut processes: Vec<Process>) -> Vec<ExecutionLog> {
+    fn schedule(&self, processes: Vec<Process>) -> Vec<ExecutionLog> {
         let mut execution_logs = vec![];
-        processes.sort_by_key(|p| p.arrival_date_time);
+        let mut cloned_processes = processes;
+        cloned_processes.sort_by_key(|p| p.arrival_date_time);
 
-        let mut current_time = processes[0].arrival_date_time;
+        let mut current_date_time = cloned_processes[0].arrival_date_time;
 
-        for process in processes {
-            if process.arrival_date_time > current_time {
-                current_time = process.arrival_date_time;
+        for process in cloned_processes {
+            if process.arrival_date_time > current_date_time {
+                current_date_time = process.arrival_date_time;
             }
 
-            let start = current_time;
+            let start = current_date_time;
             let end = start + process.burst_duration;
 
             execution_logs.push(ExecutionLog {
@@ -84,7 +85,7 @@ impl Scheduling for FirstComeFirstServed {
                 end_date_time: end,
             });
 
-            current_time = end;
+            current_date_time = end;
         }
 
         return execution_logs;
