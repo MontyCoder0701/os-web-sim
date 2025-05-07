@@ -5,6 +5,7 @@ pub struct Process {
     pub id: String,
     pub arrival_date_time: DateTime<Utc>,
     pub burst_duration: Duration,
+    pub priority: u32,
 }
 
 pub struct ExecutionLog {
@@ -24,6 +25,8 @@ pub struct RoundRobin {
 pub struct FirstComeFirstServed;
 
 pub struct ShortestJobFirst;
+
+pub struct Priority;
 
 impl Scheduler for RoundRobin {
     fn schedule(&self, processes: Vec<Process>) -> Vec<ExecutionLog> {
@@ -127,6 +130,43 @@ impl Scheduler for ShortestJobFirst {
 
             current_date_time = end;
             remaining_process_queue.retain(|p| p.id != shortest_process.id);
+        }
+
+        return execution_logs;
+    }
+}
+
+impl Scheduler for Priority {
+    fn schedule(&self, mut processes: Vec<Process>) -> Vec<ExecutionLog> {
+        let mut execution_logs = vec![];
+        let mut current_date_time = processes[0].arrival_date_time;
+
+        while !processes.is_empty() {
+            let mut ready_processes: Vec<Process> = processes
+                .iter()
+                .filter(|p| p.arrival_date_time <= current_date_time)
+                .cloned()
+                .collect();
+
+            if ready_processes.is_empty() {
+                current_date_time = processes.iter().map(|p| p.arrival_date_time).min().unwrap();
+                continue;
+            }
+
+            ready_processes.sort_by_key(|p| p.priority);
+
+            let process = ready_processes[0].clone();
+            let start = current_date_time;
+            let end = start + process.burst_duration;
+
+            execution_logs.push(ExecutionLog {
+                pid: process.id.clone(),
+                start_date_time: start,
+                end_date_time: end,
+            });
+
+            current_date_time = end;
+            processes.retain(|p| p.id != process.id);
         }
 
         return execution_logs;

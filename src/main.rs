@@ -1,5 +1,5 @@
 use chrono::{Datelike, Duration, TimeZone, Utc};
-use schedules::{FirstComeFirstServed, Process, RoundRobin, Scheduler, ShortestJobFirst};
+use schedules::{FirstComeFirstServed, Priority, Process, RoundRobin, Scheduler, ShortestJobFirst};
 use yew::prelude::*;
 
 mod schedules;
@@ -11,16 +11,19 @@ fn App() -> Html {
             id: "P1".to_string(),
             arrival_date_time: Utc::now(),
             burst_duration: Duration::seconds(5),
+            priority: 1,
         },
         Process {
             id: "P2".to_string(),
             arrival_date_time: Utc::now(),
             burst_duration: Duration::seconds(3),
+            priority: 2,
         },
         Process {
             id: "P3".to_string(),
             arrival_date_time: Utc::now(),
             burst_duration: Duration::seconds(6),
+            priority: 3,
         },
     ];
 
@@ -29,16 +32,19 @@ fn App() -> Html {
     };
     let fcfs = FirstComeFirstServed;
     let sjf = ShortestJobFirst;
+    let pr = Priority;
 
     let rr_logs = rr.schedule(processes.clone());
     let fcfs_logs = fcfs.schedule(processes.clone());
     let sjf_logs = sjf.schedule(processes.clone());
+    let pr_logs = pr.schedule(processes.clone());
 
     html! {
         <div style="padding: 32px;">
             { render_gantt_chart("Round Robin", &rr_logs) }
             { render_gantt_chart("First Come First Served", &fcfs_logs) }
             { render_gantt_chart("Shortest Job First", &sjf_logs) }
+            { render_gantt_chart("Priority", &pr_logs) }
 
             <footer style="margin-top: 64px; text-align: center; color: #6b7280; font-size: 0.9rem;">
                 { format!("© {} OS Web Sim — Built with Yew and Rust by ", Utc::now().year()) }
