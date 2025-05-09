@@ -95,37 +95,26 @@ impl Scheduling for FirstComeFirstServed {
 impl Scheduling for ShortestJobFirst {
     fn schedule(&self, processes: Vec<Process>) -> Vec<ExecutionLog> {
         let mut execution_logs = vec![];
-        let mut process_queue = processes;
-        process_queue.sort_by_key(|p| p.arrival_date_time);
+        let mut cloned_processes = processes;
+        cloned_processes.sort_by_key(|p| p.burst_duration);
 
-        let mut current_date_time = process_queue[0].arrival_date_time;
-        let mut remaining_process_queue = process_queue;
+        let mut current_date_time = cloned_processes[0].arrival_date_time;
 
-        while !remaining_process_queue.is_empty() {
-            let mut ready_processes: Vec<Process> = remaining_process_queue
-                .iter()
-                .filter(|p| p.arrival_date_time <= current_date_time)
-                .cloned()
-                .collect();
-
-            if ready_processes.is_empty() {
-                current_date_time = remaining_process_queue[0].arrival_date_time;
-                continue;
+        for process in cloned_processes {
+            if process.arrival_date_time > current_date_time {
+                current_date_time = process.arrival_date_time;
             }
 
-            ready_processes.sort_by_key(|p| p.burst_duration);
-            let shortest_process = ready_processes[0].clone();
             let start = current_date_time;
-            let end = start + shortest_process.burst_duration;
+            let end = start + process.burst_duration;
 
             execution_logs.push(ExecutionLog {
-                pid: shortest_process.id.clone(),
+                pid: process.id,
                 start_date_time: start,
                 end_date_time: end,
             });
 
             current_date_time = end;
-            remaining_process_queue.retain(|p| p.id != shortest_process.id);
         }
 
         return execution_logs;
@@ -133,36 +122,28 @@ impl Scheduling for ShortestJobFirst {
 }
 
 impl Scheduling for Priority {
-    fn schedule(&self, mut processes: Vec<Process>) -> Vec<ExecutionLog> {
+    fn schedule(&self, processes: Vec<Process>) -> Vec<ExecutionLog> {
         let mut execution_logs = vec![];
         let mut current_date_time = processes[0].arrival_date_time;
 
-        while !processes.is_empty() {
-            let mut ready_processes: Vec<Process> = processes
-                .iter()
-                .filter(|p| p.arrival_date_time <= current_date_time)
-                .cloned()
-                .collect();
+        let mut cloned_processes = processes;
+        cloned_processes.sort_by_key(|p| p.priority);
 
-            if ready_processes.is_empty() {
-                current_date_time = processes.iter().map(|p| p.arrival_date_time).min().unwrap();
-                continue;
+        for process in cloned_processes {
+            if process.arrival_date_time > current_date_time {
+                current_date_time = process.arrival_date_time;
             }
 
-            ready_processes.sort_by_key(|p| p.priority);
-
-            let process = ready_processes[0].clone();
             let start = current_date_time;
             let end = start + process.burst_duration;
 
             execution_logs.push(ExecutionLog {
-                pid: process.id.clone(),
+                pid: process.id,
                 start_date_time: start,
                 end_date_time: end,
             });
 
             current_date_time = end;
-            processes.retain(|p| p.id != process.id);
         }
 
         return execution_logs;
