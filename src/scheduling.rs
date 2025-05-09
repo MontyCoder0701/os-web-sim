@@ -15,7 +15,7 @@ pub struct ExecutionLog {
 }
 
 pub trait Scheduling {
-    fn schedule(&self, processes: Vec<Process>) -> Vec<ExecutionLog>;
+    fn schedule(&self, processes: &[Process]) -> Vec<ExecutionLog>;
 }
 
 pub struct RoundRobin {
@@ -29,9 +29,9 @@ pub struct ShortestJobFirst;
 pub struct Priority;
 
 impl Scheduling for RoundRobin {
-    fn schedule(&self, processes: Vec<Process>) -> Vec<ExecutionLog> {
+    fn schedule(&self, processes: &[Process]) -> Vec<ExecutionLog> {
         let mut execution_logs = vec![];
-        let mut cloned_processes = processes;
+        let mut cloned_processes = processes.to_vec();
         cloned_processes.sort_by_key(|p| p.arrival_date_time);
 
         let mut current_date_time = cloned_processes[0].arrival_date_time;
@@ -64,9 +64,9 @@ impl Scheduling for RoundRobin {
 }
 
 impl Scheduling for FirstComeFirstServed {
-    fn schedule(&self, processes: Vec<Process>) -> Vec<ExecutionLog> {
+    fn schedule(&self, processes: &[Process]) -> Vec<ExecutionLog> {
         let mut execution_logs = vec![];
-        let mut cloned_processes = processes;
+        let mut cloned_processes = processes.to_vec();
         cloned_processes.sort_by_key(|p| p.arrival_date_time);
 
         let mut current_date_time = cloned_processes[0].arrival_date_time;
@@ -93,9 +93,9 @@ impl Scheduling for FirstComeFirstServed {
 }
 
 impl Scheduling for ShortestJobFirst {
-    fn schedule(&self, processes: Vec<Process>) -> Vec<ExecutionLog> {
+    fn schedule(&self, processes: &[Process]) -> Vec<ExecutionLog> {
         let mut execution_logs = vec![];
-        let mut cloned_processes = processes;
+        let mut cloned_processes = processes.to_vec();
         cloned_processes.sort_by_key(|p| p.burst_duration);
 
         let mut current_date_time = cloned_processes[0].arrival_date_time;
@@ -122,11 +122,11 @@ impl Scheduling for ShortestJobFirst {
 }
 
 impl Scheduling for Priority {
-    fn schedule(&self, processes: Vec<Process>) -> Vec<ExecutionLog> {
+    fn schedule(&self, processes: &[Process]) -> Vec<ExecutionLog> {
         let mut execution_logs = vec![];
         let mut current_date_time = processes[0].arrival_date_time;
 
-        let mut cloned_processes = processes;
+        let mut cloned_processes = processes.to_vec();
         cloned_processes.sort_by_key(|p| p.priority);
 
         for process in cloned_processes {

@@ -36,10 +36,10 @@ fn App() -> Html {
     let sjf = ShortestJobFirst;
     let pr = Priority;
 
-    let rr_logs = rr.schedule(processes.clone());
-    let fcfs_logs = fcfs.schedule(processes.clone());
-    let sjf_logs = sjf.schedule(processes.clone());
-    let pr_logs = pr.schedule(processes.clone());
+    let rr_logs = rr.schedule(&processes);
+    let fcfs_logs = fcfs.schedule(&processes);
+    let sjf_logs = sjf.schedule(&processes);
+    let pr_logs = pr.schedule(&processes);
 
     html! {
         <div style="padding: 32px;">
